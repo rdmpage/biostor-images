@@ -199,14 +199,31 @@ foreach($pages as $page)
 		
 			$picture->height = $picture->bottom - $picture->top;
 			$picture->width = $picture->right - $picture->left;
-	
-			// $picture->geometry = $picture->width . 'x' . $picture->height . '+' . $picture->left . '+' . ($page_height - $picture->bottom);
+			
+			
+			$picture->rect = new Rectangle($picture->left, $picture->top, $picture->width, $picture->height);
 		
 			if (!isset($pictures[$page_counter]))
 			{
 				$pictures[$page_counter] = array();
 			}
-			$pictures[$page_counter][] = $picture;
+			
+			// ABBY XML can duplicate picture blocks (sigh) 
+			// so we need to check for overlap with existing pictures
+			
+			$add = true;
+			foreach ($pictures[$page_counter] as $p)
+			{
+				if ($picture->rect->intersectsRect($p->rect))
+				{
+					$add = false;
+				}
+			}
+			
+			if ($add)
+			{
+				$pictures[$page_counter][] = $picture;
+			}
 		}
 		
 	}
@@ -250,8 +267,7 @@ foreach($pages as $page)
 				. 'x' .  ($picture->height * $scale)
 				. '+' . ($picture->left * $scale)
 				. '+' . ($picture->top * $scale);
-				
-				
+								
 			$figure_filename = 'tmp/' . ($page_counter + 1) . '-' . $count . '.jpg';
 				
 			$command = $config['convert']
@@ -273,5 +289,7 @@ foreach($pages as $page)
 	$page_counter++;			
 	
 }
+
+print_r($pictures);
 
 ?>

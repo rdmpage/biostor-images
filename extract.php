@@ -7,6 +7,13 @@ $config['ghostscript'] 		= '/usr/local/bin/gs';
 
 $abbyy_filename = 'biostor-172504_abbyy.xml';
 $pdf_filename = 'biostor-172504.pdf';
+
+$abbyy_filename = 'biostor-134591_abbyy.xml';
+$pdf_filename = 'biostor-134591.pdf';
+
+$abbyy_filename = 'biostor-115612_abbyy.xml';
+$pdf_filename = 'biostor-115612.pdf';
+	
 	
 $xml = file_get_contents($abbyy_filename);
 
@@ -75,11 +82,17 @@ foreach($pages as $page)
 			// block id
 			
 			// block text
-			$block->text = '';
-			$ns = $xpath->query ('abbyy:text/abbyy:par/abbyy:line/abbyy:formatting/abbyy:charParams', $node);
+			$block->text = array();
+			$ns = $xpath->query ('abbyy:text/abbyy:par', $node);
 			foreach($ns as $n)
 			{
-				$block->text .= $n->firstChild->nodeValue;
+				$text = '';
+				$pars = $xpath->query ('abbyy:line/abbyy:formatting/abbyy:charParams', $n);
+				foreach($pars as $par)
+				{				
+					$text .= $par->firstChild->nodeValue;
+				}
+				$block->text[] = $text;
 			}
 			
 			
@@ -160,7 +173,7 @@ foreach($pages as $page)
 		$svg .= '</g>';
 	$svg .= '</svg>';
 
-	//file_put_contents($page_counter . '.svg', $svg);	
+	file_put_contents('tmp/' . ($page_counter + 1) . '.svg', $svg);	
 	
 
 	
@@ -209,6 +222,7 @@ foreach($pages as $page)
 		// http://stackoverflow.com/questions/977540/convert-a-pdf-to-a-transparent-png-with-ghostscript
 		// Make images bigger to start with then resize to get better text quality
 		$dpi = 72;
+		$dpi = 288;
 
 		$command = $config['ghostscript']
 			. ' -dNOPAUSE '
